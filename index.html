@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=2">
+</head>
+<body>
+    <div id="lockdown-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(231,76,60,0.95); z-index:200; flex-direction:column; justify-content:center; align-items:center; color:white; font-size:2rem; font-weight:bold;">
+        <div>🔒 SYSTEM LOCKED</div>
+        <div style="font-size:1rem; margin-top:10px; font-weight:normal;">Remote lockdown active. All controls disabled.</div>
+    </div>
+    <div class="dashboard">
+        <div class="device-grid">
+            <!-- Fan Card -->            <div class="device-card fan-type" id="fan-card" onclick="toggleDevice('fan')">
+                <div class="card-actions">
+                    <button class="action-btn emergency-btn" title="Emergency" onclick="triggerFanEmergency(event)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    </button>
+                </div>
+                <div class="graphic-container">
+                    <!-- Fan Video with Transparency -->
+                    <video id="fan-video" src="transparent_fan.webm" muted playsinline loop></video>
+                </div>
+                <div class="timer-corner" id="fan-timer" style="display: none;"></div>
+            </div>
+
+            <!-- Light Card 1 -->
+            <div class="device-card light-type" id="light1-card" onclick="toggleDevice('light1')">
+                <div class="graphic-container">
+                    <svg class="icon light-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                        <path d="M9 18h6"/>
+                        <path d="M10 22h4"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Light Card 2 -->            <div class="device-card light-type" id="light2-card" onclick="toggleOutsideLight()">
+                <div class="mode-badge" id="light2-mode">Auto</div>
+                <div class="graphic-container">
+                    <svg class="icon light-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
+                        <path d="M9 18h6"/>
+                        <path d="M10 22h4"/>
+                    </svg>
+                </div>
+                <div class="timer-corner" id="light2-timer" style="display: none;"></div>
+            </div>
+                        <!-- Battery Card -->
+            <div class="device-card sensor-type" id="battery-card">
+                <div class="battery-graphic-container">
+                    <!-- Huge Detailed Battery SVG -->
+                    <svg class="detailed-battery" viewBox="0 0 120 60">
+                        <defs>
+                            <clipPath id="battery-clip">
+                                <rect x="5" y="5" width="100" height="50" rx="5" ry="5"></rect>
+                            </clipPath>
+                        </defs>
+                        <!-- Battery Terminal -->
+                        <path d="M 105 22 L 109 22 C 112 22 112 38 109 38 L 105 38 Z" fill="#2c3e50"></path>
+                        <!-- Charge Fill (clipped so it doesn't bleed out of rounded corners) -->
+                        <rect id="battery-fill" x="5" y="5" width="0" height="50" fill="#2ecc71" clip-path="url(#battery-clip)" style="transition: width 0.5s ease, fill 0.5s ease;"></rect>
+                        <!-- Battery Outer Border (thin, drawn on top to look seamless) -->
+                        <rect x="5" y="5" width="100" height="50" rx="5" ry="5" fill="none" stroke="#2c3e50" stroke-width="2"></rect>
+                    </svg>
+                    <!-- Percentage centered inside the battery graphic -->
+                    <div class="battery-percentage" id="battery-text">--%</div>
+                </div>
+                <!-- Voltage text bottom left -->
+                
+                <div class="battery-voltage-corner" id="battery-voltage">-- V</div>
+                <div class="battery-time-corner" id="battery-time">Connecting...</div>
+
+            </div>
+            <!-- Temperature Card -->
+            <div class="device-card sensor-type" id="temp-card">
+                <div class="temp-graphic-container">
+                    <svg class="detailed-thermometer" viewBox="0 0 60 120">
+                        <defs>
+                            <clipPath id="temp-clip">
+                                <rect x="25" y="15" width="10" height="75" rx="5" ry="5"></rect>
+                            </clipPath>
+                        </defs>
+                        <!-- Tube Background -->
+                        <rect x="25" y="15" width="10" height="75" rx="5" ry="5" fill="#f0f2f5"></rect>
+                        
+                        <!-- Dynamic Liquid Fill (y and height will change based on temp) -->
+                        <rect id="temp-fill" x="25" y="45" width="10" height="45" fill="#e74c3c" clip-path="url(#temp-clip)" style="transition: all 0.5s ease;"></rect>
+                        
+                        <!-- Bulb at the bottom -->
+                        <circle cx="30" cy="95" r="14" fill="#e74c3c"></circle>
+                        
+                        <!-- Outer Glass Border -->
+                        <path d="M 25 85.5 L 25 15 C 25 9, 35 9, 35 15 L 35 85.5 A 14 14 0 1 1 25 85.5 Z" fill="none" stroke="#2c3e50" stroke-width="2"></path>
+                        
+                        <!-- Measurement Ticks -->
+                        <line x1="35" y1="25" x2="40" y2="25" stroke="#2c3e50" stroke-width="1.5"></line>
+                        <line x1="35" y1="40" x2="40" y2="40" stroke="#2c3e50" stroke-width="1.5"></line>
+                        <line x1="35" y1="55" x2="40" y2="55" stroke="#2c3e50" stroke-width="1.5"></line>
+                        <line x1="35" y1="70" x2="40" y2="70" stroke="#2c3e50" stroke-width="1.5"></line>
+                    </svg>
+                    
+                    <div class="temp-value" id="temp-value">24<span class="temp-unit">&deg;C</span></div>
+                    <div class="hum-value" id="hum-value">--%</div>
+                </div>
+            </div>
+            <!-- Power/Energy Card -->
+            <div class="device-card sensor-type" id="power-card">
+                <div class="power-container">
+                    <!-- Left: Current Usage -->
+                    <div class="power-current">
+                        <svg class="power-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                        <div class="power-value" id="current-power">--<span class="unit">W</span></div>
+                        <div class="power-label">Current</div>
+                    </div>
+                    
+                    <div class="power-divider"></div>
+                    
+                    <!-- Right: History & Date Picker -->
+                    <div class="power-history">
+                        <div class="energy-value" id="energy-total">--<span class="unit">kWh</span></div>
+                        <div class="energy-label" id="energy-label">Today</div>
+                        
+                        <div class="date-picker-group">
+                            <label class="custom-date-picker" title="Start Date">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                <input type="date" id="start-date" class="hidden-date-input">
+                            </label>
+                            <span class="date-sep">to</span>
+                            <label class="custom-date-picker" title="End Date">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                <input type="date" id="end-date" class="hidden-date-input">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Schedule/Timer Card -->
+            <div class="device-card automation-type" id="schedule-card">
+                <div class="schedule-container">
+                    <div class="schedule-icon-wrapper">
+                        <svg class="schedule-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="schedule-title">Smart Schedule</div>
+                    <div class="schedule-buttons">
+                        <button class="btn btn-add" onclick="openSchedulePopup(event)">+ Add Task</button>
+                        <button class="btn btn-view" onclick="openViewSchedules(event)">View Tasks</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Card -->
+            <div class="device-card automation-type" id="settings-card" onclick="openSettingsPopup()">
+                <div class="graphic-container" style="flex-direction: column;">
+                    <svg class="settings-icon" xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#7f8c8d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    <h3 style="margin-top: 15px; color:#2c3e50; font-size: 1.2rem;">Settings</h3>
+                </div>
+            </div>
+
+            
+            <!-- System Status Card -->
+            <div class="device-card status-type" id="status-card">
+                <div class="status-container">
+                    <div class="pulse-wrapper">
+                        <div class="pulse-ring"></div>
+                        <div class="pulse-dot"></div>
+                    </div>
+                    <div class="status-text">Online</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- ADD SCHEDULE MODAL -->
+    <div id="schedule-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeSchedulePopup()">&times;</span>
+            <h2 class="modal-title">New Schedule</h2>
+            
+            <div class="form-group">
+                <label>Select Device:</label>
+                <div class="device-selector" id="device-selector">
+                    <div class="device-option selected" data-value="fan" onclick="selectSchedDevice(this)">
+                        <svg class="dev-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+                        <span>Fan</span>
+                    </div>
+                    <div class="device-option" data-value="light1" onclick="selectSchedDevice(this)">
+                        <svg class="dev-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/></svg>
+                        <span>Main Light</span>
+                    </div>
+                    <div class="device-option" data-value="light2" onclick="selectSchedDevice(this)">
+                        <svg class="dev-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/></svg>
+                        <span>Bedroom</span>
+                    </div>
+                </div>
+                <input type="hidden" id="sched-device" value="fan">
+            </div>
+            
+            <div class="form-group">
+                <label>Action to perform:</label>
+                <div class="toggle-container">
+                    <span class="toggle-label" id="label-off" style="color:#e74c3c;">Turn OFF</span>
+                    <label class="switch">
+                        <input type="checkbox" id="sched-action" checked onchange="updateToggleStyle()">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="toggle-label" id="label-on" style="color:#2ecc71; font-weight:bold;">Turn ON</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Delay Time: <span id="time-display">15 Mins</span></label>
+                <input type="range" id="sched-time" class="time-slider" min="1" max="1440" value="15" oninput="updateTimeDisplay(this.value)">
+                <div class="slider-labels">
+                    <span>1 Min</span>
+                    <span>24 Hrs</span>
+                </div>
+            </div>
+            
+            <button class="btn btn-save" onclick="saveSchedule()">Save Schedule</button>
+        </div>
+    </div>
+
+    <!-- VIEW SCHEDULES MODAL -->
+    <div id="view-schedules-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeViewSchedules()">&times;</span>
+            <h2 class="modal-title">Active Tasks</h2>
+            <ul id="schedule-list" class="schedule-list">
+                <li class="empty-msg">No active schedules.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeSettingsPopup()">&times;</span>
+            <h2 class="modal-title">System Settings</h2>
+            
+            <div class="form-group">
+                <label>Battery Voltage Calibration (Offset)</label>
+                <div style="display:flex; align-items:center; gap: 10px;">
+                    <input type="number" id="voltage-offset" class="modal-select" step="0.1" value="0.0" style="width:100px; text-align:center; font-weight:bold;">
+                    <span style="color:#7f8c8d; font-weight:600;">Volts</span>
+                </div>
+                <small style="color:#95a5a6; font-size:0.75rem;">Add (e.g. 0.5) or Subtract (e.g. -1.2)</small>
+            </div>
+            
+            
+            <div class="form-group" style="margin-top:25px;">
+                <label>Motion Sensor Light Duration: <span id="motion-time-display" style="font-weight:bold; color:#3498db; float:right;">5 Mins</span></label>
+                <input type="range" id="motion-duration" class="time-slider" min="1" max="10" value="5" oninput="updateMotionTimeDisplay(this.value)">
+                <div class="slider-labels">
+                    <span>1 Min</span>
+                    <span>10 Mins</span>
+                </div>
+            </div>
+            
+            
+
+            <div class="form-group" style="margin-top:25px;">
+                <label>Battery Health / Efficiency: <span id="health-display" style="font-weight:bold; color:#2ecc71; float:right;">85%</span></label>
+                <input type="range" id="battery-health" class="time-slider" min="10" max="100" value="85" oninput="document.getElementById('health-display').innerText = this.value + '%'">
+                <small style="color:#95a5a6; font-size:0.75rem;">Adjust this if the estimated remaining time is wrong (Older batteries need a lower %)</small>
+            </div>
+
+            <button class="btn btn-save" onclick="saveSettings()" style="background-color:#3498db; margin-top:20px;">Save Settings</button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">Task scheduled successfully!</div>
+    
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="app.js?v=2"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

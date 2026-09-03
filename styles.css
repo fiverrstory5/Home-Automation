@@ -1,0 +1,719 @@
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #121212;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.dashboard {
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* Grid Layout */
+.device-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    width: 100%;
+}
+
+/* Device Card (Base for all cards) */
+.device-card {
+    position: relative;
+    background: radial-gradient(circle, #ffffff 0%, #e8ecef 100%);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.5s ease;
+    border-radius: 16px;
+    height: 220px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.device-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Common Graphic Container */
+.graphic-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+/* Video specific (Fan) */
+video#fan-video {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    transition: filter 0.3s ease;
+}
+
+/* Light Icon specific */
+.light-icon {
+    height: 60%;
+    width: auto;
+    color: #b0bec5;
+    transition: all 0.5s ease;
+}
+
+/* Small Top-Right Action Buttons */
+.card-actions {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+.action-btn {
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.action-btn:hover {
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    transform: scale(1.15);
+}
+.emergency-btn:hover { background: #e74c3c; color: #fff; }
+
+/* Active States */
+.device-card.fan-type.active {
+    background: radial-gradient(circle, #e0f7fa 0%, #b2ebf2 100%);
+    box-shadow: 0 0 30px rgba(0, 188, 212, 0.3);
+}
+.device-card.fan-type.active video#fan-video {
+    filter: drop-shadow(0 10px 20px rgba(0, 188, 212, 0.4));
+}
+
+.device-card.light-type.active {
+    background: radial-gradient(circle, #fff9c4 0%, #ffecb3 40%, #ffe082 100%);
+    box-shadow: 0 0 40px rgba(255, 193, 7, 0.4);
+}
+.device-card.light-type.active .light-icon {
+    color: #f57f17; 
+    filter: drop-shadow(0 0 20px rgba(255, 160, 0, 1)) drop-shadow(0 0 40px rgba(255, 193, 7, 0.8));
+}
+
+/* Battery Card Specifics */
+#battery-card { padding: 0; }
+.battery-graphic-container {
+    width: 80%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    margin: 0 auto;
+}
+.detailed-battery {
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.1));
+}
+.battery-percentage {
+    position: absolute;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    z-index: 2;
+    text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.8), 0px 0px 5px rgba(255, 255, 255, 0.9);
+}
+.battery-voltage-corner {
+    position: absolute;
+    bottom: 12px;
+    left: 15px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #34495e;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 4px 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(4px);
+}
+
+/* Temperature Card Specifics */
+.temp-graphic-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+.detailed-thermometer {
+    height: 100%;
+    max-height: 140px;
+    width: auto;
+    filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.1));
+}
+.temp-value {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1;
+    display: flex;
+    align-items: flex-start;
+}
+.temp-unit {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #7f8c8d;
+    margin-top: 5px;
+    margin-left: 4px;
+}
+
+.hum-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #3498db;
+    margin-top: 5px;
+}
+
+/* Power/Energy Card Specifics */
+#power-card { padding: 1.5rem 1rem; }
+.power-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: space-between;
+}
+.power-current, .power-history {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+.power-divider {
+    width: 2px;
+    height: 70%;
+    background-color: rgba(0,0,0,0.1);
+    margin: 0 10px;
+    border-radius: 2px;
+}
+.power-icon {
+    width: 40px;
+    height: 40px;
+    color: #f39c12;
+    margin-bottom: 5px;
+    filter: drop-shadow(0 4px 8px rgba(243, 156, 18, 0.4));
+}
+.power-value, .energy-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.1;
+}
+.power-label, .energy-label {
+    font-size: 0.75rem;
+    color: #95a5a6;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.unit {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    margin-left: 3px;
+    font-weight: 600;
+}
+.date-picker-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+}
+.date-sep {
+    font-size: 0.8rem;
+    color: #95a5a6;
+    font-weight: bold;
+}
+.custom-date-picker {
+    position: relative;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    color: #7f8c8d;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.05);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+.custom-date-picker:hover {
+    background: rgba(0,0,0,0.1);
+    color: #2c3e50;
+}
+.hidden-date-input {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+.hidden-date-input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Schedule Card Specifics */
+.schedule-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+.schedule-icon-wrapper {
+    width: 50px;
+    height: 50px;
+    background: rgba(155, 89, 182, 0.1);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #9b59b6;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(155, 89, 182, 0.2);
+}
+.schedule-icon { width: 30px; height: 30px; }
+.schedule-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+.schedule-buttons {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+}
+.btn {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btn-add { background-color: #9b59b6; color: white; }
+.btn-add:hover { background-color: #8e44ad; }
+.btn-view { background-color: transparent; border: 2px solid #9b59b6; color: #9b59b6; }
+.btn-view:hover { background-color: #9b59b6; color: white; }
+.btn-save { background-color: #2ecc71; color: white; width: 100%; padding: 12px; font-size: 1rem; margin-top: 10px; }
+.btn-save:hover { background-color: #27ae60; }
+.btn-delete { background-color: #e74c3c; color: white; padding: 4px 8px; font-size: 0.7rem; }
+
+/* Modals */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 100; 
+    left: 0; top: 0;
+    width: 100vw; height: 100vh; 
+    background-color: rgba(0,0,0,0.6); 
+    backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
+}
+.modal-content {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    animation: modalPop 0.3s ease;
+}
+@keyframes modalPop {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.close-btn {
+    position: absolute;
+    top: 15px; right: 20px;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close-btn:hover { color: #333; }
+.modal-title {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+.form-group { margin-bottom: 15px; text-align: left; }
+.form-group label {
+    display: block; font-size: 0.9rem; font-weight: 500; color: #7f8c8d; margin-bottom: 5px;
+}
+.modal-select {
+    width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #bdc3c7;
+    font-family: inherit; font-size: 1rem; color: #2c3e50; outline: none;
+}
+.modal-select:focus { border-color: #9b59b6; }
+.schedule-list {
+    list-style: none; text-align: left; max-height: 300px; overflow-y: auto;
+}
+.schedule-item {
+    background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-left: 4px solid #9b59b6;
+}
+.sched-info { font-size: 0.9rem; color: #34495e; }
+.sched-info strong { color: #2c3e50; }
+.sched-time { font-size: 0.8rem; color: #e67e22; font-weight: 600; }
+.empty-msg { color: #95a5a6; text-align: center; font-style: italic; }
+
+/* Responsive for Mobile */
+@media (max-width: 768px) {
+    .device-grid {
+        grid-template-columns: 1fr;
+    }
+    .device-card {
+        height: 180px;
+    }
+}
+
+
+/* Modal Redesign specific styles */
+.device-selector {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+.device-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border: 2px solid #bdc3c7;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #7f8c8d;
+}
+.device-option.selected {
+    border-color: #9b59b6;
+    background-color: rgba(155, 89, 182, 0.1);
+    color: #9b59b6;
+}
+.device-option .dev-icon {
+    width: 24px; height: 24px;
+    margin-bottom: 5px;
+}
+.device-option span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+}
+.toggle-label {
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #e74c3c;
+  transition: .4s;
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+}
+input:checked + .slider {
+  background-color: #2ecc71;
+}
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+.slider.round {
+  border-radius: 34px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Range Slider */
+#time-display {
+    color: #9b59b6;
+    font-weight: bold;
+    float: right;
+}
+.time-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 5px;
+    background: #dcdde1;
+    outline: none;
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+.time-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #9b59b6;
+    cursor: pointer;
+}
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #95a5a6;
+}
+
+
+/* Toast Notification */
+.toast {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #2ecc71;
+    color: #fff;
+    text-align: center;
+    border-radius: 8px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1000;
+    left: 50%;
+    bottom: 30px;
+    font-size: 1rem;
+    font-weight: 500;
+    box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+    opacity: 0;
+    transition: opacity 0.5s, bottom 0.5s;
+}
+
+.toast.show {
+    visibility: visible;
+    opacity: 1;
+    bottom: 50px;
+}
+
+
+/* Settings Card specific */
+#settings-card {
+    transition: all 0.3s ease;
+}
+#settings-card:hover {
+    border-color: #3498db;
+    box-shadow: 0 12px 40px rgba(52, 152, 219, 0.3);
+}
+#settings-card .settings-icon {
+    transition: transform 0.8s ease, stroke 0.3s ease;
+}
+#settings-card:hover .settings-icon {
+    transform: rotate(180deg);
+    stroke: #3498db;
+}
+.modal-select[type="number"] {
+    background: #f8f9fa;
+}
+
+
+/* =========================================
+   SYSTEM STATUS CARD
+   ========================================= */
+#status-card {
+    cursor: default;
+}
+#status-card:hover {
+    transform: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); /* Same as base */
+}
+
+.status-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.pulse-wrapper {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 25px;
+}
+
+.pulse-ring {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: rgba(46, 204, 113, 0.4);
+    border-radius: 50%;
+    top: -20px;
+    left: -20px;
+    animation: pulseAnim 2s infinite ease-out;
+}
+
+.pulse-dot {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: #2ecc71;
+    border-radius: 50%;
+    z-index: 2;
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.8);
+}
+
+@keyframes pulseAnim {
+    0% { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.status-title {
+    color: #2c3e50;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.status-text {
+    color: #2ecc71;
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+
+.battery-time-corner, .timer-corner {
+    position: absolute;
+    bottom: 12px;
+    right: 15px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #e67e22;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 4px 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(4px);
+}
+
+.mode-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #34495e;
+    background: rgba(255, 255, 255, 0.6);
+    padding: 4px 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+}
+.mode-badge.force-mode {
+    color: #fff;
+    background: #e74c3c;
+}
+.mode-badge.auto-mode {
+    color: #fff;
+    background: #3498db;
+}
+
+.locked-system {
+    pointer-events: none !important;
+    opacity: 0.7;
+}
+
+
+/* Hardware Feedback Loop: Loading State */
+.device-card.loading {
+    opacity: 0.8;
+    pointer-events: none; /* Prevent clicking again while loading */
+    border: 1px dashed rgba(255, 255, 255, 0.4);
+}
+
+.device-card.loading .graphic-container svg {
+    animation: hardwareLoading 1s infinite alternate ease-in-out;
+}
+
+@keyframes hardwareLoading {
+    0% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 5px rgba(255,255,255,0.8)); }
+    100% { transform: scale(1.1); opacity: 0.4; filter: drop-shadow(0 0 15px rgba(255,255,255,0.2)); }
+}
+
