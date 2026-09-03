@@ -99,8 +99,20 @@ database.ref("/").on("value", (snapshot) => {
                 outsideLightMode = data.device.state.outsideLightMode;
                 const modeBadge = document.getElementById("light2-mode");
                 if (modeBadge) {
-                    modeBadge.innerText = outsideLightMode === "force" ? "Force" : "Auto";
-                    modeBadge.className = outsideLightMode === "force" ? "mode-badge force-mode" : "mode-badge auto-mode";
+                    if (outsideLightMode === "force") {
+                        modeBadge.innerText = "Force";
+                        modeBadge.className = "mode-badge force-mode";
+                    } else {
+                        if (data.device.state.outsideLightState === true) {
+                            modeBadge.innerText = "Motion Detected";
+                            modeBadge.className = "mode-badge auto-mode";
+                            modeBadge.style.backgroundColor = "#ff9800"; // Orange alert color
+                        } else {
+                            modeBadge.innerText = "Auto";
+                            modeBadge.className = "mode-badge auto-mode";
+                            modeBadge.style.backgroundColor = ""; // Reset
+                        }
+                    }
                 }
             }
             if (data.device.state.outsideLightForceEnd !== undefined) {
