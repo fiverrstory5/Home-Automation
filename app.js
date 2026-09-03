@@ -664,13 +664,28 @@ function triggerFanEmergency(e) {
     }
 
     
-    // In final Firebase integration, this will write true to /device/state/fanEmergency
-    database.ref("/device/state").update({"fanEmergency": true}).catch(e => showToast("Error: " + e.message));
-    
-    // For now, let's just show a toast and visually activate the fan
-    if (!document.getElementById("fan-card").classList.contains("active")) { startFan(); }
-    
-    showToast("Emergency Fan Activated for 10 Minutes!");
+    // Write to Firebase
+    const card = document.getElementById("fan-card");
+    if (card) card.classList.add("loading");
+
+    // Register pending action for hardware confirmation
+    pendingActions["fan"] = setTimeout(() => {
+        delete pendingActions["fan"];
+        if (card) card.classList.remove("loading");
+        showToast("Error: Cloud did not respond.");
+    }, 15000);
+
+    database.ref("/device/state").update({"fanEmergency": true})
+        .catch(e => {
+            if (pendingActions["fan"]) {
+                clearTimeout(pendingActions["fan"]);
+                delete pendingActions["fan"];
+            }
+            if (card) card.classList.remove("loading");
+            showToast("Error: " + e.message);
+        });
+
+    closeEmergencyModal();
 }
 
 
