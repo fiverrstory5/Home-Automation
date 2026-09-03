@@ -27,6 +27,13 @@ database.ref("/").on("value", (snapshot) => {
         isOffline = (currentEpoch - data.Sensor_Data.Last_Heartbeat) > 60;
     }
 
+    // SYSTEM SETTINGS
+    if (data.Settings) {
+        if (data.Settings.voltageOffset !== undefined) latestSettings.voltageOffset = data.Settings.voltageOffset;
+        if (data.Settings.pirDurationMins !== undefined) latestSettings.pirDurationMins = data.Settings.pirDurationMins;
+        if (data.Settings.batteryHealth !== undefined) latestSettings.batteryHealth = data.Settings.batteryHealth;
+    }
+
     // SENSOR DATA - Only paint if online!
     if (data.Sensor_Data && !isOffline) {
 
@@ -617,10 +624,26 @@ function showToast(message) {
 }
 
 
+let latestSettings = {
+    voltageOffset: 0.0,
+    pirDurationMins: 5,
+    batteryHealth: 85
+};
+
 // =========================================
 // SYSTEM SETTINGS LOGIC
 // =========================================
 function openSettingsPopup() {
+    // Populate form with latest values before opening
+    document.getElementById("voltage-offset").value = latestSettings.voltageOffset;
+    
+    document.getElementById("motion-duration").value = latestSettings.pirDurationMins;
+    updateMotionTimeDisplay(latestSettings.pirDurationMins);
+    
+    document.getElementById("battery-health").value = latestSettings.batteryHealth;
+    const healthDisp = document.getElementById("health-display");
+    if(healthDisp) healthDisp.innerText = latestSettings.batteryHealth + "%";
+
     document.getElementById("settings-modal").style.display = "flex";
 }
 
