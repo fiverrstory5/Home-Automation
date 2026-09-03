@@ -172,13 +172,13 @@ function toggleDevice(device) {
     const currentState = card.classList.contains("active");
     const expectedState = !currentState;
     
-    let basePath = "/device/state";
-    let updateObj = {};
-    if (device === "fan") updateObj["fanState"] = expectedState;
-    else if (device === "light1") updateObj["insideLightState"] = expectedState;
-    else if (device === "light2") updateObj["outsideLightState"] = expectedState;
+    let path = "";
+    if (device === "fan") path = "/device/state/fanState";
+    else if (device === "light1") path = "/device/state/insideLightState";
+    else if (device === "light2") path = "/device/state/outsideLightState";
     
-    if (Object.keys(updateObj).length > 0) {
+    
+    if (path) {
         card.classList.add("loading");
         
         // Store timeout in pendingActions so updateDeviceCard can clear it
@@ -188,14 +188,10 @@ function toggleDevice(device) {
             showToast("Error: Cloud did not respond.");
             updateDeviceCard(device, currentState); // Revert UI
             // Also revert Firebase state to prevent stale value from showing ON later
-            let revertObj = {};
-            if (device === "fan") revertObj["fanState"] = currentState;
-            else if (device === "light1") revertObj["insideLightState"] = currentState;
-            else if (device === "light2") revertObj["outsideLightState"] = currentState;
-            database.ref(basePath).update(revertObj).catch(() => {});
+            database.ref(path).set(currentState).catch(() => {});
         }, 15000);
         
-        database.ref(basePath).update(updateObj)
+        database.ref(path).set(expectedState)
             .catch((error) => {
                 if (pendingActions[device]) {
                     clearTimeout(pendingActions[device]);
@@ -665,7 +661,7 @@ function triggerFanEmergency(e) {
 
     
     // In final Firebase integration, this will write true to /fanEmergency
-    database.ref("/").update({"fanEmergency": true}).catch(e => showToast("Error: " + e.message));
+    database.ref("/fanEmergency").set(true).catch(e => showToast("Error: " + e.message));
     
     // For now, let's just show a toast and visually activate the fan
     if (!document.getElementById("fan-card").classList.contains("active")) { startFan(); }
@@ -691,14 +687,14 @@ function toggleOutsideLight(e) {
     card.classList.add("loading");
     
     if (outsideLightMode === "auto") {
-        database.ref("/").update({"outsideLightForce": true}).then(() => {
+        database.ref("/outsideLightForce").set(true).then(() => {
             card.classList.remove("loading");
         }).catch((err) => {
             card.classList.remove("loading");
             showToast("Error: " + err.message);
         });
     } else {
-        database.ref("/").update({"outsideLightAuto": true}).then(() => {
+        database.ref("/outsideLightAuto").set(true).then(() => {
             card.classList.remove("loading");
         }).catch((err) => {
             card.classList.remove("loading");
