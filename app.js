@@ -334,7 +334,7 @@ function updateBattery(percentage, voltage) {
         }
     }
     if (vText && voltage !== undefined) {
-        vText.innerText = voltage + 'V';
+        vText.innerText = Number(voltage).toFixed(2) + 'V';
     }
 }
 // You can test it in console: updateBattery(45, "11.8");
@@ -348,7 +348,7 @@ function updateTemperature(temp) {
     
     if (fill && text) {
         // Create the HTML for the text + unit
-        text.innerHTML = temp + '<span class="temp-unit">&deg;C</span>';
+        text.innerHTML = Number(temp).toFixed(1) + '<span class="temp-unit">&deg;C</span>';
         
         // Calculate height based on a max temp of 50&deg;C
         // Max height of the SVG clip box is 75 (y goes from 15 to 90)
