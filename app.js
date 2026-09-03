@@ -68,8 +68,8 @@ database.ref("/").on("value", (snapshot) => {
     
     
     // SYSTEM LOCKDOWN
-    if (data.System_Lock !== undefined) {
-        isSystemLocked = data.System_Lock;
+    if (data.device && data.device.state && data.device.state.System_Lock !== undefined) {
+        isSystemLocked = data.device.state.System_Lock;
         const overlay = document.getElementById("lockdown-overlay");
         if (overlay) {
             overlay.style.display = isSystemLocked ? "flex" : "none";
@@ -664,8 +664,8 @@ function triggerFanEmergency(e) {
     }
 
     
-    // In final Firebase integration, this will write true to /fanEmergency
-    database.ref("/").update({"fanEmergency": true}).catch(e => showToast("Error: " + e.message));
+    // In final Firebase integration, this will write true to /device/state/fanEmergency
+    database.ref("/device/state").update({"fanEmergency": true}).catch(e => showToast("Error: " + e.message));
     
     // For now, let's just show a toast and visually activate the fan
     if (!document.getElementById("fan-card").classList.contains("active")) { startFan(); }
@@ -691,14 +691,14 @@ function toggleOutsideLight(e) {
     card.classList.add("loading");
     
     if (outsideLightMode === "auto") {
-        database.ref("/").update({"outsideLightForce": true}).then(() => {
+        database.ref("/device/state").update({"outsideLightForce": true}).then(() => {
             card.classList.remove("loading");
         }).catch((err) => {
             card.classList.remove("loading");
             showToast("Error: " + err.message);
         });
     } else {
-        database.ref("/").update({"outsideLightAuto": true}).then(() => {
+        database.ref("/device/state").update({"outsideLightAuto": true}).then(() => {
             card.classList.remove("loading");
         }).catch((err) => {
             card.classList.remove("loading");
