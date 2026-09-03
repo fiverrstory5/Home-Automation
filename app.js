@@ -55,7 +55,7 @@ database.ref("/").on("value", (snapshot) => {
         if (data.Sensor_Data.Power_W !== undefined) {
             document.getElementById("current-power").innerHTML = Math.round(data.Sensor_Data.Power_W) + `<span class="unit">W</span>`;
         }
-        if (data.Sensor_Data.Energy_Today_Wh !== undefined) {
+        if (data.Sensor_Data.Energy_Today_Wh !== undefined && !isViewingHistory) {
             document.getElementById("energy-total").innerHTML = (data.Sensor_Data.Energy_Today_Wh / 1000).toFixed(2) + `<span class="unit">kWh</span>`;
         }
         if (data.Sensor_Data.Temperature !== undefined) {
@@ -415,9 +415,11 @@ window.addEventListener('DOMContentLoaded', () => {
             if (start && end) {
                 if (start === today && end === today) {
                     energyLabel.innerText = "Today";
+                    isViewingHistory = false;
                     // Today's energy is updated by the Firebase listener, no need to set here
                 } else {
                     energyLabel.innerText = "Custom Range";
+                    isViewingHistory = true;
                     // Fetch real energy history from Firebase
                     const startEpochDay = Math.floor(new Date(start).getTime() / 1000 / 86400);
                     const endEpochDay = Math.floor(new Date(end).getTime() / 1000 / 86400);
@@ -764,7 +766,8 @@ function toggleOutsideLight(e) {
 // =========================================
 // SYSTEM ONLINE/OFFLINE STATUS LOGIC
 // =========================================
-let lastHeartbeat = 0; // Start at 0 so it immediately shows offline until real data arrives
+let lastHeartbeat = 0;
+let isViewingHistory = false; // Prevents 5-sec realtime update from overwriting the energy chart/history selection // Start at 0 so it immediately shows offline until real data arrives
 
 // In final integration, call this inside the Firebase on() callback
 function updateHeartbeat(epochFromFirebase) {
