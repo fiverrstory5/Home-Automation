@@ -259,6 +259,14 @@
                 <small style="color:#95a5a6; font-size:0.75rem;">Add (e.g. 0.5) or Subtract (e.g. -1.2)</small>
             </div>
             
+            <div class="form-group" style="margin-top:25px;">
+                <label>Power/Current Calibration (Multiplier)</label>
+                <div style="display:flex; align-items:center; gap: 10px;">
+                    <input type="number" id="power-multiplier" class="modal-select" step="0.1" min="0.1" value="1.0" style="width:100px; text-align:center; font-weight:bold;">
+                    <span style="color:#7f8c8d; font-weight:600;">x (Times)</span>
+                </div>
+                <small style="color:#95a5a6; font-size:0.75rem;">Multiply reading (e.g. 2.0 doubles the power)</small>
+            </div>
             
             <div class="form-group" style="margin-top:25px;">
                 <label>Motion Sensor Light Duration: <span id="motion-time-display" style="font-weight:bold; color:#3498db; float:right;">5 Mins</span></label>

@@ -30,6 +30,7 @@ database.ref("/").on("value", (snapshot) => {
     // SYSTEM SETTINGS
     if (data.Settings) {
         if (data.Settings.voltageOffset !== undefined) latestSettings.voltageOffset = data.Settings.voltageOffset;
+        if (data.Settings.powerMultiplier !== undefined) latestSettings.powerMultiplier = data.Settings.powerMultiplier;
         if (data.Settings.pirDurationMins !== undefined) latestSettings.pirDurationMins = data.Settings.pirDurationMins;
         if (data.Settings.batteryHealth !== undefined) latestSettings.batteryHealth = data.Settings.batteryHealth;
     }
@@ -628,6 +629,7 @@ function showToast(message) {
 
 let latestSettings = {
     voltageOffset: 0.0,
+    powerMultiplier: 1.0,
     pirDurationMins: 5,
     batteryHealth: 85
 };
@@ -638,6 +640,7 @@ let latestSettings = {
 function openSettingsPopup() {
     // Populate form with latest values before opening
     document.getElementById("voltage-offset").value = latestSettings.voltageOffset;
+    document.getElementById("power-multiplier").value = latestSettings.powerMultiplier;
     
     document.getElementById("motion-duration").value = latestSettings.pirDurationMins;
     updateMotionTimeDisplay(latestSettings.pirDurationMins);
@@ -668,11 +671,13 @@ function saveSettings() {
     }
 
     const offset = document.getElementById("voltage-offset").value;
+    const powerMult = document.getElementById("power-multiplier").value;
     const duration = document.getElementById("motion-duration").value;
     const health = document.getElementById("battery-health").value;
     
     database.ref("/Settings").update({
         voltageOffset: parseFloat(offset),
+        powerMultiplier: parseFloat(powerMult),
         pirDurationMins: parseInt(duration),
         batteryHealth: parseInt(health)
     }).catch(e => showToast("Error: " + e.message));
