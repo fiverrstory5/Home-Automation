@@ -99,9 +99,14 @@ database.ref("/").on("value", (snapshot) => {
             updateDeviceCard("light1", false);
             updateDeviceCard("light2", false);
         } else {
-            updateDeviceCard("fan", data.device.state.fanState);
-            updateDeviceCard("light1", data.device.state.insideLightState);
-            updateDeviceCard("light2", data.device.state.outsideLightState);
+            // Only apply Firebase state if we haven't clicked a button in the last 2 seconds
+            // This prevents the instant revert caused by Firebase local caching
+            const timeSinceClick = Date.now() - window.lastClickTime;
+            if (timeSinceClick > 2000) {
+                updateDeviceCard("fan", data.device.state.fanState);
+                updateDeviceCard("light1", data.device.state.insideLightState);
+                updateDeviceCard("light2", data.device.state.outsideLightState);
+            }
             
             if (data.device.state.outsideLightMode !== undefined) {
                 outsideLightMode = data.device.state.outsideLightMode;
@@ -148,7 +153,10 @@ let fanInterval;
 // =========================================
 let pendingActions = {};
 
+window.lastClickTime = 0;
+
 function toggleDevice(device) {
+    window.lastClickTime = Date.now();
     const card = document.getElementById(device + "-card");
     if (card.classList.contains("loading")) return;
 
@@ -667,6 +675,7 @@ function closeEmergencyModal() {
 }
 
 function startEmergency() {
+    window.lastClickTime = Date.now();
     if (isSystemLocked) {
         showToast("Error: System is Locked!");
         return;
@@ -690,6 +699,7 @@ function startEmergency() {
 
 
 function toggleOutsideLight(e) {
+    window.lastClickTime = Date.now();
     if(e) e.stopPropagation();
     if (isSystemLocked) {
         showToast("Error: System is Locked!");
@@ -698,25 +708,18 @@ function toggleOutsideLight(e) {
     const isOffline = (Math.floor(Date.now() / 1000) - lastHeartbeat) > 60;
     if (isOffline) { showToast("Error: System is Offline!"); return; }
     
-    const card = document.getElementById("light2-card");
-    if (card.classList.contains("loading")) return;
-    
-    card.classList.add("loading");
-    
+    const modeBadge = document.getElementById("light2-mode");
+
     if (outsideLightMode === "auto") {
-        database.ref("/device/command").update({"outsideLightForce": true}).then(() => {
-            card.classList.remove("loading");
-        }).catch(e => {
-            card.classList.remove("loading");
-            showToast("Error: " + e.message);
-        });
+        outsideLightMode = "force";
+        if (modeBadge) modeBadge.innerText = "FORCE ON";
+        database.ref("/device/command").update({"outsideLightForce": true})
+            .catch(e => showToast("Error: " + e.message));
     } else {
-        database.ref("/device/command").update({"outsideLightAuto": true}).then(() => {
-            card.classList.remove("loading");
-        }).catch((err) => {
-            card.classList.remove("loading");
-            showToast("Error: " + err.message);
-        });
+        outsideLightMode = "auto";
+        if (modeBadge) modeBadge.innerText = "AUTO";
+        database.ref("/device/command").update({"outsideLightAuto": true})
+            .catch((err) => showToast("Error: " + err.message));
     }
 }
 
