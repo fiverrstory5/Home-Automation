@@ -192,7 +192,7 @@ function toggleDevice(device) {
     const currentState = card.classList.contains("active");
     const expectedState = !currentState;
     
-    let basePath = "/device/state";
+    let basePath = "/device/command";
     let updateObj = {};
     if (device === "fan") updateObj["fanState"] = expectedState;
     else if (device === "light1") updateObj["insideLightState"] = expectedState;
@@ -717,7 +717,7 @@ function triggerFanEmergency(e) {
         showToast("Error: Cloud did not respond.");
     }, 15000);
 
-    database.ref("/device/state").update({"fanEmergency": true})
+    database.ref("/device/command").update({"fanEmergency": true})
         .catch(e => {
             if (pendingActions["fan"]) {
                 clearTimeout(pendingActions["fan"]);
@@ -748,14 +748,14 @@ function toggleOutsideLight(e) {
     card.classList.add("loading");
     
     if (outsideLightMode === "auto") {
-        database.ref("/device/state").update({"outsideLightForce": true}).then(() => {
+        database.ref("/device/command").update({"outsideLightForce": true}).then(() => {
             card.classList.remove("loading");
-        }).catch((err) => {
+        }).catch(e => {
             card.classList.remove("loading");
-            showToast("Error: " + err.message);
+            showToast("Error: " + e.message);
         });
     } else {
-        database.ref("/device/state").update({"outsideLightAuto": true}).then(() => {
+        database.ref("/device/command").update({"outsideLightAuto": true}).then(() => {
             card.classList.remove("loading");
         }).catch((err) => {
             card.classList.remove("loading");
