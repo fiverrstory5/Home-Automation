@@ -132,32 +132,7 @@ database.ref("/").on("value", (snapshot) => {
         }
     }
 
-    // HARDWARE CONFIRMATION (from ESP32)
-    if (data.device && data.device.confirmed) {
-        const conf = data.device.confirmed;
-        const dev = conf.device;
-        
-        if (dev && pendingActions[dev]) {
-            // ESP32 responded! Clear timeout and loading
-            clearTimeout(pendingActions[dev]);
-            delete pendingActions[dev];
-            
-            const card = document.getElementById(dev + "-card");
-            if (card) card.classList.remove("loading");
-            
-            if (conf.success) {
-                // Hardware confirmed - update UI to actual state
-                updateDeviceCard(dev, conf.state);
-            } else {
-                // Hardware rejected - show error reason and revert UI
-                showToast("⚠ " + (conf.reason || "Command rejected"));
-                updateDeviceCard(dev, conf.state); // Show actual hardware state
-            }
-            
-            // Clean up confirmation from Firebase
-            database.ref("/device/confirmed").remove().catch(() => {});
-        }
-    }
+    // (Hardware Confirmation UI blocking removed per user request)
 
 });
 
@@ -199,45 +174,22 @@ function toggleDevice(device) {
     else if (device === "light2") updateObj["outsideLightState"] = expectedState;
     
     if (Object.keys(updateObj).length > 0) {
-        card.classList.add("loading");
-        
-        // Store timeout in pendingActions so updateDeviceCard can clear it
-        pendingActions[device] = setTimeout(() => {
-            delete pendingActions[device];
-            card.classList.remove("loading");
-            showToast("Error: Cloud did not respond.");
-            updateDeviceCard(device, currentState); // Revert UI
-            // Also revert Firebase state to prevent stale value from showing ON later
-            let revertObj = {};
-            if (device === "fan") revertObj["fanState"] = currentState;
-            else if (device === "light1") revertObj["insideLightState"] = currentState;
-            else if (device === "light2") revertObj["outsideLightState"] = currentState;
-            database.ref(basePath).update(revertObj).catch(() => {});
-        }, 15000);
+        // Optimistic UI Update (Instant feedback)
+        updateDeviceCard(device, expectedState);
         
         database.ref(basePath).update(updateObj)
             .catch((error) => {
-                if (pendingActions[device]) {
-                    clearTimeout(pendingActions[device]);
-                    delete pendingActions[device];
-                }
-                card.classList.remove("loading");
                 showToast("Error: " + error.message);
-                updateDeviceCard(device, currentState);
+                updateDeviceCard(device, currentState); // Revert on failure
             });
     }
 }
 
 
-// Update device UI state. If a pendingAction exists, skip (wait for hardware confirmation)
+// Update device UI state
 function updateDeviceCard(device, state) {
     const card = document.getElementById(device + "-card");
     if (!card) return;
-    
-    // If we're waiting for hardware confirmation, DON'T update UI from Firebase echo
-    if (pendingActions[device]) {
-        return; // Wait for /device/confirmed or timeout
-    }
     
     if (state) {
         if (!card.classList.contains("active")) {
@@ -701,29 +653,33 @@ function triggerFanEmergency(e) {
 
     const isOffline = (Math.floor(Date.now() / 1000) - lastHeartbeat) > 60;
     if (isOffline) {
+        fetch("/api/toggle_emerg", { method: "POST" })
+            .then(() => showToast("Emergency Mode sent!"))
+            .catch(() => showToast("Failed to reach device"));
+        return;
+    }
+
+    document.getElementById("emergency-modal").style.display = "flex";
+}
+
+function closeEmergencyModal() {
+    document.getElementById("emergency-modal").style.display = "none";
+}
+
+function startEmergency() {
+    if (isSystemLocked) {
+        showToast("Error: System is Locked!");
+        return;
+    }
+
+    const isOffline = (Math.floor(Date.now() / 1000) - lastHeartbeat) > 60;
+    if (isOffline) {
         showToast("Error: System is Offline!");
         return;
     }
 
-    
-    // Write to Firebase
-    const card = document.getElementById("fan-card");
-    if (card) card.classList.add("loading");
-
-    // Register pending action for hardware confirmation
-    pendingActions["fan"] = setTimeout(() => {
-        delete pendingActions["fan"];
-        if (card) card.classList.remove("loading");
-        showToast("Error: Cloud did not respond.");
-    }, 15000);
-
     database.ref("/device/command").update({"fanEmergency": true})
         .catch(e => {
-            if (pendingActions["fan"]) {
-                clearTimeout(pendingActions["fan"]);
-                delete pendingActions["fan"];
-            }
-            if (card) card.classList.remove("loading");
             showToast("Error: " + e.message);
         });
 
