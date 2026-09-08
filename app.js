@@ -16,6 +16,28 @@ let outsideLightForceEnd = 0;
 let fanEmergencyEnd = 0;
 
 // =========================================
+// ON-DEMAND PRESENCE SENSING (Tab Focus / Background)
+// =========================================
+const webActiveRef = database.ref("/device/command/webActive");
+
+function updateWebPresence() {
+    const isVisible = (document.visibilityState === 'visible');
+    if (isVisible) {
+        webActiveRef.set(true);
+        webActiveRef.onDisconnect().set(false);
+    } else {
+        webActiveRef.set(false);
+    }
+}
+
+document.addEventListener("visibilitychange", updateWebPresence);
+window.addEventListener("focus", updateWebPresence);
+window.addEventListener("blur", updateWebPresence);
+window.addEventListener("pagehide", () => webActiveRef.set(false));
+window.addEventListener("beforeunload", () => webActiveRef.set(false));
+updateWebPresence();
+
+// =========================================
 // LOCAL STORAGE CACHING & FAST RESTORE (0-Delay)
 // =========================================
 function loadCachedState() {
