@@ -706,6 +706,44 @@ let latestSettings = {
 // SYSTEM SETTINGS LOGIC
 // =========================================
 function openSettingsPopup() {
+    const authModal = document.getElementById("settings-auth-modal");
+    const pwdInput = document.getElementById("settings-password-input");
+    const errorMsg = document.getElementById("settings-auth-error");
+    if (pwdInput) pwdInput.value = "";
+    if (errorMsg) errorMsg.style.display = "none";
+    if (authModal) {
+        authModal.style.display = "flex";
+        setTimeout(() => { if (pwdInput) pwdInput.focus(); }, 100);
+    } else {
+        showActualSettingsModal();
+    }
+}
+
+function closeSettingsAuthPopup() {
+    const authModal = document.getElementById("settings-auth-modal");
+    if (authModal) authModal.style.display = "none";
+}
+
+function verifySettingsPassword() {
+    const pwdInput = document.getElementById("settings-password-input");
+    const errorMsg = document.getElementById("settings-auth-error");
+    const entered = pwdInput ? pwdInput.value.trim() : "";
+    if (entered === "admin123") {
+        closeSettingsAuthPopup();
+        showActualSettingsModal();
+    } else {
+        if (errorMsg) {
+            errorMsg.innerText = "गलत पासवर्ड! कृपया दोबारा प्रयास करें।";
+            errorMsg.style.display = "block";
+        }
+        if (pwdInput) {
+            pwdInput.value = "";
+            pwdInput.focus();
+        }
+    }
+}
+
+function showActualSettingsModal() {
     // Populate form with latest values before opening
     document.getElementById("voltage-offset").value = latestSettings.voltageOffset;
     document.getElementById("power-multiplier").value = latestSettings.powerMultiplier;

@@ -260,6 +260,27 @@
         </div>
     </div>
     
+    <!-- SETTINGS AUTHENTICATION MODAL -->
+    <div id="settings-auth-modal" class="modal">
+        <div class="modal-content" style="max-width: 380px; text-align: center;">
+            <span class="close-btn" onclick="closeSettingsAuthPopup()">&times;</span>
+            <div style="font-size: 2.5rem; margin-bottom: 8px;">🔒</div>
+            <h2 class="modal-title" style="margin-bottom: 8px;">Admin Verification</h2>
+            <p style="color: #7f8c8d; font-size: 0.88rem; margin-bottom: 20px;">
+                Enter admin password to access calibration &amp; system settings.
+            </p>
+            <div class="form-group" style="text-align: left;">
+                <label for="settings-password-input">Admin Password</label>
+                <input type="password" id="settings-password-input" class="modal-select" placeholder="Enter password" style="width: 100%; box-sizing: border-box; padding: 10px; font-size: 1rem; border-radius: 8px; border: 1px solid #ccc;" onkeydown="if(event.key==='Enter') verifySettingsPassword()">
+                <div id="settings-auth-error" style="color: #e74c3c; font-size: 0.82rem; margin-top: 6px; display: none; font-weight: bold;">गलत पासवर्ड! (Incorrect password)</div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn" onclick="closeSettingsAuthPopup()" style="flex: 1; background-color: #95a5a6; color: white;">Cancel</button>
+                <button class="btn btn-save" onclick="verifySettingsPassword()" style="flex: 1; background-color: #3498db; margin-top: 0;">Unlock</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- SETTINGS MODAL -->
     <div id="settings-modal" class="modal">
         <div class="modal-content">
