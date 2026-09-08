@@ -135,6 +135,22 @@ database.ref("/device/state").on("value", (snapshot) => {
     applyDeviceState(data);
 });
 
+// 3. MASTER KILL SWITCH LISTENER (External System: /System_Status/Master_Block)
+database.ref("/System_Status/Master_Block").on("value", (snapshot) => {
+    if (snapshot.exists()) {
+        const val = snapshot.val();
+        const locked = (val === true || val === 1 || val === "true" || val === "1");
+        isSystemLocked = locked;
+        const overlay = document.getElementById("lockdown-overlay");
+        if (overlay) overlay.style.display = isSystemLocked ? "flex" : "none";
+        const grid = document.querySelector(".device-grid");
+        if (grid) {
+            if (isSystemLocked) grid.classList.add("locked-system");
+            else grid.classList.remove("locked-system");
+        }
+    }
+});
+
 function applyDeviceState(state) {
     if (!state) return;
 
