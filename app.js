@@ -782,3 +782,144 @@ setInterval(() => {
         statusCard.style.borderColor = "rgba(46, 204, 113, 0.3)";
     }
 }, 10000);
+
+
+// =========================================
+// SYSTEM DIAGNOSTICS & RESET HISTORY
+// =========================================
+function openDiagnosticsPopup() {
+    const isOffline = (Math.floor(Date.now() / 1000) - lastHeartbeat) > 60;
+    const statusVal = document.getElementById("diag-status-val");
+    if (statusVal) {
+        statusVal.innerText = isOffline ? "Offline" : "Online";
+        statusVal.style.color = isOffline ? "#e74c3c" : "#2ecc71";
+    }
+    document.getElementById("diagnostics-modal").style.display = "flex";
+}
+
+function closeDiagnosticsPopup() {
+    document.getElementById("diagnostics-modal").style.display = "none";
+}
+
+// Close modal if user clicks outside modal content
+window.addEventListener('click', (e) => {
+    const diagModal = document.getElementById("diagnostics-modal");
+    if (e.target === diagModal) {
+        closeDiagnosticsPopup();
+    }
+});
+
+function clearResetHistory() {
+    if (confirm("Are you sure you want to clear the reset history log?")) {
+        database.ref("/Diagnostics/Reset_History").remove()
+            .then(() => {
+                showToast("Reset history cleared!");
+            })
+            .catch(err => showToast("Error: " + err.message));
+    }
+}
+
+// Helper to escape HTML and prevent injection
+function escapeHtmlText(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Realtime Listener for Diagnostics & Reset History
+database.ref("/Diagnostics").on("value", (snapshot) => {
+    const diag = snapshot.val() || {};
+    
+    // Latest Reset Reason & RAM
+    if (diag.Last_Reset) {
+        const last = diag.Last_Reset;
+        const reasonEl = document.getElementById("diag-latest-reason");
+        const timeEl = document.getElementById("diag-latest-time");
+        const ramEl = document.getElementById("diag-ram-val");
+
+        if (reasonEl) reasonEl.innerText = last.reason || "Unknown";
+        if (ramEl && last.freeHeap) ramEl.innerText = Math.round(last.freeHeap / 1024) + " KB";
+
+        if (timeEl && last.timestamp) {
+            const d = new Date(last.timestamp * 1000);
+            timeEl.innerText = d.toLocaleString('en-IN', {
+                month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                hour12: true
+            });
+        }
+    }
+
+    // Reset History List
+    const historyList = document.getElementById("reset-history-list");
+    const countVal = document.getElementById("diag-count-val");
+    if (!historyList) return;
+
+    if (!diag.Reset_History) {
+        historyList.innerHTML = '<li class="empty-msg">No reset logs available.</li>';
+        if (countVal) countVal.innerText = "0";
+        return;
+    }
+
+    const items = [];
+    for (let k in diag.Reset_History) {
+        items.push({ id: k, ...diag.Reset_History[k] });
+    }
+
+    // Sort newest first
+    items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+    if (countVal) countVal.innerText = items.length;
+
+    // Limit to last 20
+    const displayItems = items.slice(0, 20);
+
+    let html = "";
+    displayItems.forEach((entry) => {
+        const reason = entry.reason || "Unknown";
+        let typeClass = "type-default";
+        let badgeClass = "badge-default";
+        let badgeLabel = "REBOOT";
+
+        const lower = reason.toLowerCase();
+        if (lower.includes("brownout")) {
+            typeClass = "type-brownout";
+            badgeClass = "badge-brownout";
+            badgeLabel = "BROWNOUT";
+        } else if (lower.includes("watchdog") || lower.includes("wdt")) {
+            typeClass = "type-wdt";
+            badgeClass = "badge-wdt";
+            badgeLabel = "WATCHDOG";
+        } else if (lower.includes("panic") || lower.includes("crash")) {
+            typeClass = "type-panic";
+            badgeClass = "badge-panic";
+            badgeLabel = "CRASH";
+        } else if (lower.includes("power-on")) {
+            typeClass = "type-poweron";
+            badgeClass = "badge-poweron";
+            badgeLabel = "POWER ON";
+        }
+
+        let timeStr = "--";
+        if (entry.timestamp) {
+            const d = new Date(entry.timestamp * 1000);
+            timeStr = d.toLocaleString('en-IN', {
+                month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                hour12: true
+            });
+        }
+
+        html += `
+            <li class="reset-history-item ${typeClass}">
+                <div class="reset-history-info">
+                    <span class="reset-reason-text">${escapeHtmlText(reason)}</span>
+                    <span class="reset-time-text">🕒 ${timeStr}</span>
+                </div>
+                <span class="reset-badge ${badgeClass}">${badgeLabel}</span>
+            </li>
+        `;
+    });
+
+    historyList.innerHTML = html;
+});

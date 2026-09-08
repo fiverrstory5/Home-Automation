@@ -170,13 +170,14 @@
 
             
             <!-- System Status Card -->
-            <div class="device-card status-type" id="status-card">
+            <div class="device-card status-type" id="status-card" onclick="openDiagnosticsPopup()" title="Click to view Reset History & System Diagnostics">
                 <div class="status-container">
                     <div class="pulse-wrapper">
                         <div class="pulse-ring"></div>
                         <div class="pulse-dot"></div>
                     </div>
                     <div class="status-text">Online</div>
+                    <div class="status-subtext" style="font-size:0.75rem; color:#7f8c8d; margin-top:6px; font-weight:500;">Diagnostics & Logs</div>
                 </div>
             </div>
         </div>
@@ -286,6 +287,46 @@
             </div>
 
             <button class="btn btn-save" onclick="saveSettings()" style="background-color:#3498db; margin-top:20px;">Save Settings</button>
+        </div>
+    </div>
+
+    <!-- DIAGNOSTICS & RESET HISTORY MODAL -->
+    <div id="diagnostics-modal" class="modal">
+        <div class="modal-content" style="max-width: 520px;">
+            <span class="close-btn" onclick="closeDiagnosticsPopup()">&times;</span>
+            <h2 class="modal-title">System Diagnostics</h2>
+            
+            <div class="diag-overview">
+                <div class="diag-item">
+                    <div class="diag-label">Board Status</div>
+                    <div class="diag-value" id="diag-status-val" style="color:#2ecc71;">Online</div>
+                </div>
+                <div class="diag-item">
+                    <div class="diag-label">Free RAM</div>
+                    <div class="diag-value" id="diag-ram-val">-- KB</div>
+                </div>
+                <div class="diag-item">
+                    <div class="diag-label">Total Logs</div>
+                    <div class="diag-value" id="diag-count-val">0</div>
+                </div>
+            </div>
+
+            <div class="diag-last-box">
+                <div class="diag-last-title">⚡ Latest Reboot Reason:</div>
+                <div class="diag-last-desc" id="diag-latest-reason">No reboot records yet.</div>
+                <div class="diag-last-time" id="diag-latest-time">--</div>
+            </div>
+
+            <div class="diag-history-header">
+                <h3 style="margin:0; font-size:1.05rem; color:#2c3e50;">Reset History (Last 20)</h3>
+                <button class="btn-clear-history" onclick="clearResetHistory()">Clear Logs</button>
+            </div>
+
+            <div class="diag-history-container">
+                <ul id="reset-history-list" class="reset-history-list">
+                    <li class="empty-msg">No reset logs available.</li>
+                </ul>
+            </div>
         </div>
     </div>
 
