@@ -255,14 +255,20 @@ function updateDeviceCard(device, state) {
     if (!card) return;
     
     if (state) {
-        if (!card.classList.contains("active")) {
-            card.classList.add("active");
-            if (device === "fan") startFan();
+        card.classList.add("active");
+        if (device === "fan") {
+            const video = document.getElementById('fan-video');
+            if (!video || video.paused || fanSpeed < 1.0) {
+                startFan();
+            }
         }
     } else {
-        if (card.classList.contains("active")) {
-            card.classList.remove("active");
-            if (device === "fan") stopFan();
+        card.classList.remove("active");
+        if (device === "fan") {
+            const video = document.getElementById('fan-video');
+            if (video && (!video.paused || fanSpeed > 0)) {
+                stopFan();
+            }
         }
     }
 }
@@ -272,13 +278,30 @@ function startFan() {
     if (!video) return;
     
     clearInterval(fanInterval);
+    video.muted = true;
     
-    // Ensure video is playing
-    video.play().catch(e => console.log('Autoplay prevented:', e));
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+        playPromise.catch((e) => {
+            console.log('Autoplay waiting for user gesture:', e);
+            const retryOnInteraction = () => {
+                const card = document.getElementById('fan-card');
+                if (card && card.classList.contains('active')) {
+                    video.play().catch(() => {});
+                }
+                document.removeEventListener('click', retryOnInteraction);
+                document.removeEventListener('touchstart', retryOnInteraction);
+            };
+            document.addEventListener('click', retryOnInteraction, { once: true });
+            document.addEventListener('touchstart', retryOnInteraction, { once: true });
+        });
+    }
+    
+    if (fanSpeed < 1.0) fanSpeed = 1.0;
     
     // Gradually increase speed
     fanInterval = setInterval(() => {
-        fanSpeed += 0.1;
+        fanSpeed += 0.2;
         if (fanSpeed >= MAX_SPEED) {
             fanSpeed = MAX_SPEED;
             clearInterval(fanInterval);
@@ -295,7 +318,7 @@ function stopFan() {
     
     // Gradually decrease speed
     fanInterval = setInterval(() => {
-        fanSpeed -= 0.05; 
+        fanSpeed -= 0.1; 
         if (fanSpeed <= 0.1) {
             fanSpeed = 0;
             video.pause();
@@ -308,9 +331,16 @@ function stopFan() {
 
 window.onload = () => {
     const video = document.getElementById('fan-video');
-    if (video) {
-        video.pause();
-        video.playbackRate = 0.1; 
+    const fanCard = document.getElementById('fan-card');
+    
+    // Only pause video if fan is NOT active!
+    if (fanCard && fanCard.classList.contains('active')) {
+        startFan();
+    } else {
+        if (video) {
+            video.pause();
+            video.playbackRate = 0.1; 
+        }
     }
     
     // Client-side countdown timer for Fan Emergency and Light2 Force Mode
