@@ -696,6 +696,91 @@ input:checked + .slider:before {
     background: #3498db;
 }
 
+/* =========================================
+   MOTORCYCLE INDICATOR 3-WAY SWITCH WIDGET
+   ========================================= */
+.bike-switch-container {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 15;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.bike-switch-track {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(226, 232, 240, 0.85);
+    border: 1.5px solid rgba(203, 213, 225, 0.9);
+    border-radius: 20px;
+    padding: 3px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.05);
+    width: 174px;
+    height: 32px;
+    touch-action: pan-y;
+    box-sizing: border-box;
+}
+
+.bike-switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 54px;
+    height: 25px;
+    border-radius: 14px;
+    background: #10b981;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 3 Positions of the Thumb */
+.bike-switch-track.pos-left .bike-switch-thumb {
+    transform: translateX(0px);
+    background: #ef4444;
+}
+.bike-switch-track.pos-center .bike-switch-thumb {
+    transform: translateX(58px);
+    background: #10b981;
+}
+.bike-switch-track.pos-center.motion-active .bike-switch-thumb {
+    background: #f59e0b;
+}
+.bike-switch-track.pos-right .bike-switch-thumb {
+    transform: translateX(114px);
+    background: #0284c7;
+}
+
+.bike-switch-btn {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.bike-switch-track.pos-left #btn-mode-force-off,
+.bike-switch-track.pos-center #btn-mode-auto,
+.bike-switch-track.pos-right #btn-mode-force-on {
+    color: #ffffff;
+    font-weight: 800;
+}
+
 .locked-system {
     pointer-events: none !important;
     opacity: 0.7;

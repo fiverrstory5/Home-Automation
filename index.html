@@ -39,8 +39,22 @@
                 </div>
             </div>
 
-            <!-- Light Card 2 -->            <div class="device-card light-type" id="light2-card" onclick="toggleOutsideLight()">
-                <div class="mode-badge" id="light2-mode">Auto</div>
+            <!-- Light Card 2 (Outside Light with Bike Indicator Switch) -->
+            <div class="device-card light-type" id="light2-card">
+                <div class="bike-switch-container" id="light2-switch" onclick="event.stopPropagation()">
+                    <div class="bike-switch-track pos-center" id="bike-switch-track">
+                        <div class="bike-switch-thumb" id="bike-switch-thumb"></div>
+                        <button type="button" class="bike-switch-btn btn-left" id="btn-mode-force-off" title="Force OFF (1 Hour Mute)" onclick="handleSwitchModeClick('force_off', event)">
+                            ◀ OFF
+                        </button>
+                        <button type="button" class="bike-switch-btn btn-center" id="btn-mode-auto" title="Click to return to AUTO" onclick="handleSwitchModeClick('auto', event)">
+                            AUTO
+                        </button>
+                        <button type="button" class="bike-switch-btn btn-right" id="btn-mode-force-on" title="Force ON (1 Hour)" onclick="handleSwitchModeClick('force_on', event)">
+                            ON ▶
+                        </button>
+                    </div>
+                </div>
                 <div class="graphic-container">
                     <svg class="icon light-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/>
@@ -49,6 +63,7 @@
                     </svg>
                 </div>
                 <div class="timer-corner" id="light2-timer" style="display: none;"></div>
+                <div class="mode-badge" id="light2-mode" style="display: none;">Auto</div>
             </div>
                         <!-- Battery Card -->
             <div class="device-card sensor-type" id="battery-card">
